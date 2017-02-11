@@ -208,6 +208,10 @@ import java.util.IdentityHashMap;
   }
 
   @Override
+  public void onPeriodMetadata(String metadata){
+  }
+
+  @Override
   public void onContinueLoadingRequested(MediaPeriod ignored) {
     if (trackGroups == null) {
       // Still preparing.

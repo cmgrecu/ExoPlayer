@@ -112,6 +112,16 @@ public class OkHttpDataSource implements HttpDataSource {
   }
 
   @Override
+  public boolean isIcyMetadataAvailable() {
+    return false;
+  }
+
+  @Override
+  public String getIcyMetadata() {
+    return null;
+  }
+
+  @Override
   public Uri getUri() {
     return response == null ? null : Uri.parse(response.request().url().toString());
   }

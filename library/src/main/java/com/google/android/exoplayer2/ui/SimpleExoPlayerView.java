@@ -682,6 +682,10 @@ public final class SimpleExoPlayerView extends FrameLayout {
     }
 
     @Override
+    public void onMetadataUpdate(String metadata) {
+    }
+
+    @Override
     public void onTracksChanged(TrackGroupArray tracks, TrackSelectionArray selections) {
       updateForCurrentTrackSelections();
     }

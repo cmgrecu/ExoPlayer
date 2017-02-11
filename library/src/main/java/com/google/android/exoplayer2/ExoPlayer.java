@@ -172,6 +172,14 @@ public interface ExoPlayer {
      */
     void onPositionDiscontinuity();
 
+
+    /**
+     * Called when a metadata update is received
+     * <p>
+     *
+     * @param metadata The metadata received
+     */
+    void onMetadataUpdate(String metadata);
   }
 
   /**

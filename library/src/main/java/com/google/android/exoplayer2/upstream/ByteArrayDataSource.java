@@ -41,6 +41,16 @@ public final class ByteArrayDataSource implements DataSource {
   }
 
   @Override
+  public boolean isIcyMetadataAvailable() {
+    return false;
+  }
+
+  @Override
+  public String getIcyMetadata() {
+    return null;
+  }
+
+  @Override
   public long open(DataSpec dataSpec) throws IOException {
     uri = dataSpec.uri;
     readPosition = (int) dataSpec.position;

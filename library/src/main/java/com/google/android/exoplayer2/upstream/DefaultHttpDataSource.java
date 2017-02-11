@@ -84,6 +84,11 @@ public class DefaultHttpDataSource implements HttpDataSource {
   private long bytesSkipped;
   private long bytesRead;
 
+  private int metadataInterval = C.METADATA_INTERVAL_UNSET;
+  private long lastMetadataPos = 0;
+  private int bytesMetadaRemaining = 0;
+  StringBuilder currentMetadata = new StringBuilder();
+
   /**
    * @param userAgent The User-Agent string that should be used.
    * @param contentTypePredicate An optional {@link Predicate}. If a content type is rejected by the
@@ -148,6 +153,28 @@ public class DefaultHttpDataSource implements HttpDataSource {
     this.connectTimeoutMillis = connectTimeoutMillis;
     this.readTimeoutMillis = readTimeoutMillis;
     this.allowCrossProtocolRedirects = allowCrossProtocolRedirects;
+  }
+
+  @Override
+  public boolean isIcyMetadataAvailable()
+  {
+    synchronized (currentMetadata) {
+      return metadataInterval != C.METADATA_INTERVAL_UNSET && currentMetadata.length() > 0 && bytesMetadaRemaining == 0;
+    }
+  }
+
+  @Override
+  public String getIcyMetadata()
+  {
+    synchronized (currentMetadata) {
+      if (isIcyMetadataAvailable()) {
+        String newMeta =  new String(currentMetadata);
+        currentMetadata.setLength(0);
+        return newMeta;
+      }
+    }
+
+    return null;
   }
 
   @Override
@@ -237,6 +264,8 @@ public class DefaultHttpDataSource implements HttpDataSource {
         long contentLength = getContentLength(connection);
         bytesToRead = contentLength != C.LENGTH_UNSET ? (contentLength - bytesToSkip)
             : C.LENGTH_UNSET;
+
+        metadataInterval = getMetadataInterval(connection);
       }
     } else {
       // Gzip is enabled. If the server opts to use gzip then the content length in the response
@@ -406,10 +435,16 @@ public class DefaultHttpDataSource implements HttpDataSource {
       }
       connection.setRequestProperty("Range", rangeRequest);
     }
+    else
+    {
+      // request Icy-MetaData for continuous streams (unknown length)
+      connection.setRequestProperty("Icy-MetaData", "1");
+    }
     connection.setRequestProperty("User-Agent", userAgent);
     if (!allowGzip) {
       connection.setRequestProperty("Accept-Encoding", "identity");
     }
+
     connection.setInstanceFollowRedirects(followRedirects);
     connection.setDoOutput(postBody != null);
     if (postBody != null) {
@@ -458,6 +493,24 @@ public class DefaultHttpDataSource implements HttpDataSource {
     return url;
   }
 
+  /**
+   * Attempts to extract the icy metadata interval from the response headers of an open connection.
+   *
+   * @param connection The open connection.
+   * @return The extracted length, or {@link C#METADATA_INTERVAL_UNSET}.
+   */
+  private static int getMetadataInterval(HttpURLConnection connection) {
+    int metaInt = C.METADATA_INTERVAL_UNSET;
+    String metaInthHeader = connection.getHeaderField("Icy-MetaInt");
+    if (!TextUtils.isEmpty(metaInthHeader)) {
+      try {
+        metaInt = Integer.parseInt(metaInthHeader);
+      } catch (NumberFormatException e) {
+        Log.e(TAG, "Unexpected Meta-Int [" + metaInthHeader + "]");
+      }
+    }
+      return metaInt;
+  }
   /**
    * Attempts to extract the length of the content from the response headers of an open connection.
    *
@@ -558,12 +611,29 @@ public class DefaultHttpDataSource implements HttpDataSource {
     if (readLength == 0) {
       return 0;
     }
+
+    boolean readMeta = false;
     if (bytesToRead != C.LENGTH_UNSET) {
       long bytesRemaining = bytesToRead - bytesRead;
       if (bytesRemaining == 0) {
         return C.RESULT_END_OF_INPUT;
       }
       readLength = (int) Math.min(readLength, bytesRemaining);
+    }
+    else
+    {
+      if (metadataInterval != C.METADATA_INTERVAL_UNSET)
+      {
+        if (bytesMetadaRemaining > 0)
+          readLength = (int) Math.min(readLength, bytesMetadaRemaining);
+        else {
+          readLength = (int) Math.min(readLength, lastMetadataPos + metadataInterval - bytesRead);
+          if (readLength == 0) {
+            readLength = 1;
+            readMeta = true;
+          }
+        }
+      }
     }
 
     int read = inputStream.read(buffer, offset, readLength);
@@ -573,6 +643,45 @@ public class DefaultHttpDataSource implements HttpDataSource {
         throw new EOFException();
       }
       return C.RESULT_END_OF_INPUT;
+    }
+
+    if (metadataInterval != C.METADATA_INTERVAL_UNSET)
+    {
+        if (readMeta)
+        {
+          int metaLength = /*expressed in number of 16 byte blocks*/ Math.abs(buffer[offset]) * 16;
+
+          currentMetadata.setLength(0);
+          bytesMetadaRemaining = metaLength;
+
+          if (metaLength == 0)
+            lastMetadataPos = bytesRead + read;
+
+          bytesRead += read;
+          return 0;
+        }
+        else
+        {
+          if (bytesMetadaRemaining > 0)
+          {
+            bytesMetadaRemaining -= read;
+            for (int i = 0; i <read; i++) {
+              if (buffer[offset + i] == 0)
+                break;
+
+              currentMetadata.append((char) buffer[offset + i]);
+            }
+
+            if (bytesMetadaRemaining == 0)
+            {
+              // finished reading metadata
+              lastMetadataPos = bytesRead + read;
+            }
+
+            bytesRead += read;
+            return 0;
+          }
+        }
     }
 
     bytesRead += read;

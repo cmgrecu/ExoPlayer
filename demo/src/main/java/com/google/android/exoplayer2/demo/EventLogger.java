@@ -131,6 +131,10 @@ import java.util.Locale;
   }
 
   @Override
+  public void onMetadataUpdate(String metadata) {
+  }
+
+  @Override
   public void onTracksChanged(TrackGroupArray ignored, TrackSelectionArray trackSelections) {
     MappedTrackInfo mappedTrackInfo = trackSelector.getCurrentMappedTrackInfo();
     if (mappedTrackInfo == null) {

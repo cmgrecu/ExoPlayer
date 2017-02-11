@@ -15,6 +15,7 @@
  */
 package com.google.android.exoplayer2.ui;
 
+import android.text.TextUtils;
 import android.widget.TextView;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -36,6 +37,7 @@ public final class DebugTextViewHelper implements Runnable, ExoPlayer.EventListe
   private final SimpleExoPlayer player;
   private final TextView textView;
 
+  private String currentMetdata = "";
   private boolean started;
 
   /**
@@ -81,6 +83,23 @@ public final class DebugTextViewHelper implements Runnable, ExoPlayer.EventListe
   }
 
   @Override
+  public void onMetadataUpdate(String metadata) {
+    currentMetdata = metadata;
+    currentMetdata = currentMetdata.replaceAll("StreamTitle=", "");
+    currentMetdata = currentMetdata.trim();
+    if (currentMetdata.endsWith("'") || currentMetdata.endsWith("\"") || currentMetdata.endsWith(";"))
+      currentMetdata = currentMetdata.substring(0, currentMetdata.length() - 1);
+
+    if (currentMetdata.endsWith("'") || currentMetdata.endsWith("\"") || currentMetdata.endsWith(";"))
+      currentMetdata = currentMetdata.substring(0, currentMetdata.length() - 1);
+
+    if (currentMetdata.startsWith("'") || currentMetdata.startsWith("\"") )
+      currentMetdata = currentMetdata.substring(1);
+
+    currentMetdata = currentMetdata.trim();
+  }
+
+  @Override
   public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
     updateAndPost();
   }
@@ -115,10 +134,18 @@ public final class DebugTextViewHelper implements Runnable, ExoPlayer.EventListe
   // Private methods.
 
   private void updateAndPost() {
-    textView.setText(getPlayerStateString() + getPlayerWindowIndexString() + getVideoString()
-        + getAudioString());
+    textView.setText(getPlayerStateString() + getPlayerWindowIndexString() + getVideoString() + getAudioString() +
+            getNowPlaying());
     textView.removeCallbacks(this);
     textView.postDelayed(this, REFRESH_INTERVAL_MS);
+  }
+
+  private String getNowPlaying()
+  {
+    if (currentMetdata == null || currentMetdata.isEmpty())
+      return "";
+
+    return "\nnow playing: " + currentMetdata;
   }
 
   private String getPlayerStateString() {

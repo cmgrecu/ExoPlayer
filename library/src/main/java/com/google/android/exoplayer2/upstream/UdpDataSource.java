@@ -95,6 +95,16 @@ public final class UdpDataSource implements DataSource {
   }
 
   @Override
+  public boolean isIcyMetadataAvailable() {
+    return false;
+  }
+
+  @Override
+  public String getIcyMetadata() {
+    return null;
+  }
+
+  @Override
   public long open(DataSpec dataSpec) throws UdpDataSourceException {
     uri = dataSpec.uri;
     String host = uri.getHost();

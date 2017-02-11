@@ -87,6 +87,16 @@ public final class RawResourceDataSource implements DataSource {
   }
 
   @Override
+  public boolean isIcyMetadataAvailable() {
+    return false;
+  }
+
+  @Override
+  public String getIcyMetadata() {
+    return null;
+  }
+
+  @Override
   public long open(DataSpec dataSpec) throws RawResourceDataSourceException {
     try {
       uri = dataSpec.uri;

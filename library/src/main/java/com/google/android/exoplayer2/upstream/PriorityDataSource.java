@@ -51,6 +51,16 @@ public final class PriorityDataSource implements DataSource {
   }
 
   @Override
+  public boolean isIcyMetadataAvailable() {
+    return false;
+  }
+
+  @Override
+  public String getIcyMetadata() {
+    return null;
+  }
+
+  @Override
   public long open(DataSpec dataSpec) throws IOException {
     priorityTaskManager.proceedOrThrow(priority);
     return upstream.open(dataSpec);

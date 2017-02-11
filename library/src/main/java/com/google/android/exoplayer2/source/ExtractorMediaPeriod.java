@@ -17,6 +17,7 @@ package com.google.android.exoplayer2.source;
 
 import android.net.Uri;
 import android.os.Handler;
+import android.util.Log;
 import android.util.SparseArray;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.Format;
@@ -633,6 +634,19 @@ import java.io.IOException;
           while (result == Extractor.RESULT_CONTINUE && !loadCanceled) {
             loadCondition.block();
             result = extractor.read(input, positionHolder);
+
+            if (dataSource.isIcyMetadataAvailable()) {
+              final String metadata = dataSource.getIcyMetadata();
+              if (metadata != null) {
+                eventHandler.post(new Runnable() {
+                  @Override
+                  public void run() {
+                   callback.onPeriodMetadata(metadata);
+                  }
+                });
+              }
+            }
+
             if (input.getPosition() > position + CONTINUE_LOADING_CHECK_INTERVAL_BYTES) {
               position = input.getPosition();
               loadCondition.close();

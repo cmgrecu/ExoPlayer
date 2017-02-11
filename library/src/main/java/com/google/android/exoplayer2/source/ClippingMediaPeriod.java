@@ -186,6 +186,11 @@ public final class ClippingMediaPeriod implements MediaPeriod, MediaPeriod.Callb
   }
 
   @Override
+  public void onPeriodMetadata(String metdata) {
+
+  }
+
+  @Override
   public void onContinueLoadingRequested(MediaPeriod source) {
     callback.onContinueLoadingRequested(this);
   }

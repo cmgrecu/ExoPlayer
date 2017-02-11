@@ -478,6 +478,11 @@ public class PlayerActivity extends Activity implements OnClickListener, ExoPlay
   }
 
   @Override
+  public void onMetadataUpdate(String metadata) {
+    // Do nothing.
+  }
+
+  @Override
   public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
     updateButtonVisibilities();
     MappedTrackInfo mappedTrackInfo = trackSelector.getCurrentMappedTrackInfo();

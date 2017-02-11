@@ -38,6 +38,16 @@ public final class AesCipherDataSource implements DataSource {
   }
 
   @Override
+  public boolean isIcyMetadataAvailable() {
+    return false;
+  }
+
+  @Override
+  public String getIcyMetadata() {
+    return null;
+  }
+
+  @Override
   public long open(DataSpec dataSpec) throws IOException {
     long dataLength = upstream.open(dataSpec);
     long nonce = CryptoUtil.getFNV64Hash(dataSpec.key);

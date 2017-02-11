@@ -41,6 +41,14 @@ public interface MediaPeriod extends SequenceableLoader {
      */
     void onPrepared(MediaPeriod mediaPeriod);
 
+
+    /**
+     * Called when metadata is detected.
+     * <p>
+     *
+     * @param metadata The medatadata received
+     */
+    void onPeriodMetadata(String metadata);
   }
 
   /**

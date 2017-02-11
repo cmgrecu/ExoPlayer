@@ -102,6 +102,16 @@ public final class DefaultDataSource implements DataSource {
   }
 
   @Override
+  public boolean isIcyMetadataAvailable() {
+    return dataSource.isIcyMetadataAvailable();
+  }
+
+  @Override
+  public String getIcyMetadata() {
+    return dataSource.getIcyMetadata();
+  }
+
+  @Override
   public long open(DataSpec dataSpec) throws IOException {
     Assertions.checkState(dataSource == null);
     // Choose the correct source for the scheme.

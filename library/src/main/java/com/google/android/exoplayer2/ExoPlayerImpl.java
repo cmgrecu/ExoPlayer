@@ -383,6 +383,14 @@ import java.util.concurrent.CopyOnWriteArraySet;
         }
         break;
       }
+
+      case ExoPlayerImplInternal.MSG_METADATA_UPDATE: {
+        String metadata = (String) msg.obj;
+        for (EventListener listener : listeners) {
+          listener.onMetadataUpdate(metadata);
+        }
+        break;
+      }
     }
   }
 

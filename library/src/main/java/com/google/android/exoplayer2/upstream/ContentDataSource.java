@@ -67,6 +67,16 @@ public final class ContentDataSource implements DataSource {
   }
 
   @Override
+  public boolean isIcyMetadataAvailable() {
+    return false;
+  }
+
+  @Override
+  public String getIcyMetadata() {
+    return null;
+  }
+
+  @Override
   public long open(DataSpec dataSpec) throws ContentDataSourceException {
     try {
       uri = dataSpec.uri;

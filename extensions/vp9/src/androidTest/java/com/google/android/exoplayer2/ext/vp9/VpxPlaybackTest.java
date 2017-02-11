@@ -112,6 +112,11 @@ public class VpxPlaybackTest extends InstrumentationTestCase {
     }
 
     @Override
+    public void onMetadataUpdate(String metadata) {
+      // Do nothing.
+    }
+
+    @Override
     public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
       // Do nothing.
     }

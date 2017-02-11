@@ -62,6 +62,11 @@ public final class C {
   public static final int LENGTH_UNSET = -1;
 
   /**
+   * Represents an unset or unknown metadata interval.
+   */
+  public static final int METADATA_INTERVAL_UNSET = -1;
+
+  /**
    * The number of microseconds in one second.
    */
   public static final long MICROS_PER_SECOND = 1000000L;

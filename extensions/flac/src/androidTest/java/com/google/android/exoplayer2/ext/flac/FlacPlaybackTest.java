@@ -93,6 +93,11 @@ public class FlacPlaybackTest extends InstrumentationTestCase {
     }
 
     @Override
+    public void onMetadataUpdate(String metadata) {
+      // Do nothong.
+    }
+
+    @Override
     public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
       // Do nothing.
     }

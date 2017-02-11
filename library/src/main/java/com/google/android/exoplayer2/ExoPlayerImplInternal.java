@@ -97,6 +97,7 @@ import java.io.IOException;
   public static final int MSG_POSITION_DISCONTINUITY = 5;
   public static final int MSG_SOURCE_INFO_REFRESHED = 6;
   public static final int MSG_ERROR = 7;
+  public static final int MSG_METADATA_UPDATE = 8;
 
   // Internal messages
   private static final int MSG_PREPARE = 0;
@@ -110,6 +111,7 @@ import java.io.IOException;
   private static final int MSG_SOURCE_CONTINUE_LOADING_REQUESTED = 8;
   private static final int MSG_TRACK_SELECTION_INVALIDATED = 9;
   private static final int MSG_CUSTOM = 10;
+  private static final int MSG_STRING_METADATA = 11;
 
   private static final int PREPARING_SOURCE_INTERVAL_MS = 10;
   private static final int RENDERING_INTERVAL_MS = 10;
@@ -269,6 +271,13 @@ import java.io.IOException;
     handler.obtainMessage(MSG_PERIOD_PREPARED, source).sendToTarget();
   }
 
+
+  @Override
+  public void onPeriodMetadata(String metadata) {
+    handler.obtainMessage(MSG_STRING_METADATA, metadata).sendToTarget();
+  }
+
+
   @Override
   public void onContinueLoadingRequested(MediaPeriod source) {
     handler.obtainMessage(MSG_SOURCE_CONTINUE_LOADING_REQUESTED, source).sendToTarget();
@@ -328,10 +337,17 @@ import java.io.IOException;
           reselectTracksInternal();
           return true;
         }
+
         case MSG_CUSTOM: {
           sendMessagesInternal((ExoPlayerMessage[]) msg.obj);
           return true;
         }
+
+        case MSG_STRING_METADATA: {
+          handleMetadata((String) msg.obj);
+          return true;
+        }
+
         default:
           return false;
       }
@@ -840,6 +856,11 @@ import java.io.IOException;
       }
       loadingPeriodHolder.mediaPeriod.maybeThrowPrepareError();
     }
+  }
+
+  private void  handleMetadata(String metadata)
+  {
+    eventHandler.obtainMessage(ExoPlayerImplInternal.MSG_METADATA_UPDATE,metadata).sendToTarget();
   }
 
   private void handleSourceInfoRefreshed(Pair<Timeline, Object> timelineAndManifest)

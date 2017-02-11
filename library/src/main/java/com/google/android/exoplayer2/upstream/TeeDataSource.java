@@ -38,6 +38,16 @@ public final class TeeDataSource implements DataSource {
   }
 
   @Override
+  public boolean isIcyMetadataAvailable() {
+    return false;
+  }
+
+  @Override
+  public String getIcyMetadata() {
+    return null;
+  }
+
+  @Override
   public long open(DataSpec dataSpec) throws IOException {
     long dataLength = upstream.open(dataSpec);
     if (dataSpec.length == C.LENGTH_UNSET && dataLength != C.LENGTH_UNSET) {

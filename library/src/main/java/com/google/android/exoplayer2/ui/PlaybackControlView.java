@@ -768,6 +768,10 @@ public class PlaybackControlView extends FrameLayout {
     }
 
     @Override
+    public void onMetadataUpdate(String metadata) {
+    }
+
+    @Override
     public void onTimelineChanged(Timeline timeline, Object manifest) {
       updateNavigation();
       updateProgress();

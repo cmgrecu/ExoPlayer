@@ -91,4 +91,18 @@ public interface DataSource {
    */
   void close() throws IOException;
 
+
+  /**
+   * Check if the icy-metadata is supplied by the source.
+   *
+   * @return true if icy-metadata is supplied by the source.
+   */
+  boolean isIcyMetadataAvailable();
+
+  /**
+   * Get the icy-metadata supplied by the source.
+   *
+   * @return a String containing the icy-metadata supplied by the source.
+   */
+  String getIcyMetadata();
 }
